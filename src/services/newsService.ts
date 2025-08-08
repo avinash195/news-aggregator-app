@@ -17,19 +17,31 @@ export class NewsService {
       // Fetch from NewsAPI
       if (filters.source === 'All Sources' || filters.source === 'NewsAPI') {
         try {
-          const newsApiParams: any = {
-            pageSize: Math.ceil(pageSize / 3), // Distribute across APIs
-            page
-          };
-
+          // Use search endpoint if there's a search query, otherwise use top-headlines
+          let newsApiResult;
+          
           if (searchQuery) {
-            newsApiParams.q = searchQuery;
+            // Use search endpoint for queries
+            const searchParams = {
+              q: searchQuery,
+              pageSize: pageSize,
+              page
+            };
+            newsApiResult = await NewsApiService.searchArticles(searchParams);
+          } else {
+            // Use top-headlines for general news
+            const topHeadlinesParams: any = {
+              pageSize: pageSize,
+              page,
+              country: 'us' // Default country parameter required by NewsAPI
+            };
+            
+            if (filters.category && filters.category !== 'All Categories') {
+              topHeadlinesParams.category = filters.category.toLowerCase();
+            }
+            
+            newsApiResult = await NewsApiService.getTopHeadlines(topHeadlinesParams);
           }
-          if (filters.category && filters.category !== 'All Categories') {
-            newsApiParams.category = filters.category.toLowerCase();
-          }
-
-          const newsApiResult = await NewsApiService.getTopHeadlines(newsApiParams);
           allArticles.push(...newsApiResult.articles);
           totalResults += newsApiResult.totalResults;
         } catch (error) {
@@ -41,7 +53,7 @@ export class NewsService {
       if (filters.source === 'All Sources' || filters.source === 'The Guardian') {
         try {
           const guardianParams: any = {
-            'page-size': Math.ceil(pageSize / 3),
+            'page-size': pageSize,
             page
           };
 
@@ -64,7 +76,7 @@ export class NewsService {
       if (filters.source === 'All Sources' || filters.source === 'The New York Times') {
         try {
           const nytParams: any = {
-            page: Math.ceil(page / 3)
+            page: page
           };
 
           if (searchQuery) {

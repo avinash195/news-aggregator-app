@@ -94,6 +94,15 @@ The application will be available at `http://localhost:5173` with hot reload ena
 - **Save**: Bookmark articles for later reading
 - **Share**: Share articles via native sharing or copy link
 
+### Pagination
+- **Page Navigation**: Navigate through pages using Previous/Next buttons
+- **Page Numbers**: Click on specific page numbers to jump directly
+- **First/Last Page**: Use double arrow buttons to go to first or last page
+- **Page Input**: Type a specific page number for quick navigation
+- **Page Size**: Choose how many articles to display per page (default: 10, options: 10, 20, 50, 100)
+- **Results Info**: See which results are currently displayed (e.g., "Showing 21 to 30 of 150 results")
+- **Smart Reset**: Changing page size automatically resets to page 1 for better user experience
+
 ### Personalization
 1. Click "Personalize Feed" in the navbar
 2. Select your preferred sources and categories
@@ -113,6 +122,7 @@ src/
 │   ├── Filters.tsx
 │   ├── Navbar.tsx
 │   ├── SearchBar.tsx
+│   ├── Pagination.tsx
 │   ├── Loader.tsx
 │   └── ErrorMessage.tsx
 ├── hooks/             # Custom React hooks

@@ -10,6 +10,7 @@ interface UseNewsApiReturn {
   searchArticles: (query: string) => void;
   applyFilters: (filters: Filter) => void;
   changePage: (page: number) => void;
+  changePageSize: (pageSize: number) => void;
   refreshArticles: () => void;
 }
 
@@ -21,7 +22,7 @@ export function useNewsApi(): UseNewsApiReturn {
     currentPage: 1,
     totalPages: 0,
     totalResults: 0,
-    pageSize: 20
+    pageSize: 10
   });
   const [currentFilters, setCurrentFilters] = useState<Filter>({
     category: 'All Categories',
@@ -71,6 +72,10 @@ export function useNewsApi(): UseNewsApiReturn {
     setPagination(prev => ({ ...prev, currentPage: page }));
   }, []);
 
+  const changePageSize = useCallback((pageSize: number) => {
+    setPagination(prev => ({ ...prev, pageSize, currentPage: 1 }));
+  }, []);
+
   const refreshArticles = useCallback(() => {
     fetchArticles();
   }, [fetchArticles]);
@@ -83,6 +88,7 @@ export function useNewsApi(): UseNewsApiReturn {
     searchArticles,
     applyFilters,
     changePage,
+    changePageSize,
     refreshArticles
   };
 }

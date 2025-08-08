@@ -1,11 +1,11 @@
 // import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNewsApi } from '../hooks/useNewsApi';
 import { useFilters } from '../hooks/useFilters';
 import { Filters } from '../components/Filters';
 import { ArticleCard } from '../components/ArticleCard';
 import { Loader } from '../components/Loader';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { Pagination } from '../components/Pagination';
 import type { Article } from '../types';
 
 export function Home() {
@@ -16,6 +16,7 @@ export function Home() {
     pagination,
     applyFilters,
     changePage,
+    changePageSize,
     refreshArticles
   } = useNewsApi();
 
@@ -57,77 +58,7 @@ export function Home() {
     });
   };
 
-  const renderPagination = () => {
-    if (pagination.totalPages <= 1) return null;
-
-    const pages = [];
-    const currentPage = pagination.currentPage;
-    const totalPages = pagination.totalPages;
-
-    // Always show first page
-    pages.push(1);
-
-    // Show pages around current page
-    const start = Math.max(2, currentPage - 2);
-    const end = Math.min(totalPages - 1, currentPage + 2);
-
-    if (start > 2) {
-      pages.push('...');
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    if (end < totalPages - 1) {
-      pages.push('...');
-    }
-
-    // Always show last page
-    if (totalPages > 1) {
-      pages.push(totalPages);
-    }
-
-    return (
-      <div className="flex items-center justify-center space-x-2 mt-8">
-        <button
-          onClick={() => changePage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <span>Previous</span>
-        </button>
-
-        {pages.map((page, index) => (
-          <button
-            key={index}
-            onClick={() => typeof page === 'number' && changePage(page)}
-            disabled={page === '...'}
-            className={cn(
-              "px-3 py-2 text-sm rounded-md transition-colors",
-              page === currentPage
-                ? "bg-blue-600 text-white"
-                : page === '...'
-                ? "text-gray-400 cursor-default"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-            )}
-          >
-            {page}
-          </button>
-        ))}
-
-        <button
-          onClick={() => changePage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span>Next</span>
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-    );
-  };
+  // Pagination is now handled by the Pagination component
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -215,8 +146,14 @@ export function Home() {
               </div>
             )}
 
-            {/* Pagination */}
-            {renderPagination()}
+            {/* Enhanced Pagination */}
+            <Pagination
+              pagination={pagination}
+              onPageChange={changePage}
+              onPageSizeChange={changePageSize}
+              showPageSizeSelector={true}
+              pageSizeOptions={[10, 20, 50, 100]}
+            />
           </div>
         </div>
       </div>
@@ -224,6 +161,4 @@ export function Home() {
   );
 }
 
-function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(' ');
-}
+
