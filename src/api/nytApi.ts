@@ -1,6 +1,6 @@
 import type { Article, NYTApiResponse, NYTSectionsResponse } from '../types';
 
-const NYT_API_KEY = import.meta.env.VITE_NYT_API_KEY || 'your-nyt-api-key';
+const NYT_API_KEY = import.meta.env.VITE_NYT_API_KEY;
 const NYT_API_BASE_URL = 'https://api.nytimes.com/svc';
 
 export class NYTApiService {

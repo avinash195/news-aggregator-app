@@ -39,13 +39,15 @@ A modern, responsive news aggregator web application built with React.js, TypeSc
    npm install
    ```
 
-3. **Set up environment variables** (optional)
-   Create a `.env` file in the root directory:
+3. **Set up environment variables**
+   Create a `.env` file in the root directory with your API keys:
    ```env
    VITE_NEWS_API_KEY=your_news_api_key
    VITE_GUARDIAN_API_KEY=your_guardian_api_key
    VITE_NYT_API_KEY=your_nyt_api_key
    ```
+   
+   **Note**: The `.env` file is already in `.gitignore` to keep your API keys secure.
 
 4. **Start the development server**
    ```bash
@@ -151,6 +153,8 @@ To get the full functionality, you'll need API keys from the following services:
 
 ### Environment Variables
 
+The application uses environment variables to securely store API keys. Create a `.env` file in the root directory:
+
 ```env
 # NewsAPI Configuration
 VITE_NEWS_API_KEY=your_news_api_key
@@ -161,6 +165,8 @@ VITE_GUARDIAN_API_KEY=your_guardian_api_key
 # NYT API Configuration
 VITE_NYT_API_KEY=your_nyt_api_key
 ```
+
+**Security Note**: The `.env` file is automatically ignored by Git to prevent API keys from being committed to version control.
 
 ## 🧪 Development
 
