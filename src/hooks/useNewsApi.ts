@@ -12,6 +12,7 @@ interface UseNewsApiReturn {
   changePage: (page: number) => void;
   changePageSize: (pageSize: number) => void;
   refreshArticles: () => void;
+  currentSearchQuery: string;
 }
 
 export function useNewsApi(): UseNewsApiReturn {
@@ -89,6 +90,7 @@ export function useNewsApi(): UseNewsApiReturn {
     applyFilters,
     changePage,
     changePageSize,
-    refreshArticles
+    refreshArticles,
+    currentSearchQuery: searchQuery
   };
 }

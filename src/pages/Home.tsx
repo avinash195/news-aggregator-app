@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 // import { useState } from 'react';
 import { useNewsApi } from '../hooks/useNewsApi';
 import { useFilters } from '../hooks/useFilters';
@@ -8,16 +9,18 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { Pagination } from '../components/Pagination';
 import type { Article } from '../types';
 
-export function Home() {
+export function Home({ searchQuery }: { searchQuery: string }) {
   const {
     articles,
     loading,
     error,
     pagination,
     applyFilters,
+    searchArticles,
     changePage,
     changePageSize,
-    refreshArticles
+    refreshArticles,
+    currentSearchQuery
   } = useNewsApi();
 
   const {
@@ -30,6 +33,14 @@ export function Home() {
     resetFilters,
     getActiveFiltersCount
   } = useFilters();
+
+  // Trigger search when searchQuery changes
+  useEffect(() => {
+    console.log('Home: Search query changed:', searchQuery);
+    if (searchQuery !== currentSearchQuery) {
+      searchArticles(searchQuery);
+    }
+  }, [searchQuery, searchArticles, currentSearchQuery]);
 
   // Saved articles state (for future implementation)
   // const [savedArticles, setSavedArticles] = useState<Set<string>>(new Set());
@@ -90,6 +101,17 @@ export function Home() {
               <p className="text-lg text-gray-600">
                 {pagination.totalResults} results found
               </p>
+              {/* Search indicator */}
+              {currentSearchQuery && (
+                <p className="text-sm text-blue-600 mt-2">
+                  🔍 Searching for: "{currentSearchQuery}"
+                </p>
+              )}
+              {articles.length > 0 && (
+                <p className="text-sm text-gray-500 mt-2">
+                  Showing {articles.length} articles from {pagination.totalResults} total results
+                </p>
+              )}
             </div>
 
             {/* Active Filter Tags */}
@@ -131,7 +153,9 @@ export function Home() {
               <div className="text-center py-12">
                 <div className="text-gray-400 text-6xl mb-4">📰</div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No articles found</h3>
-                <p className="text-gray-600">Try adjusting your search or filters</p>
+                <p className="text-gray-600">
+                  {currentSearchQuery ? `No results found for "${currentSearchQuery}"` : 'Try adjusting your search or filters'}
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -160,5 +184,3 @@ export function Home() {
     </div>
   );
 }
-
-
