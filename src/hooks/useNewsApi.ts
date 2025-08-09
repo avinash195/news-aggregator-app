@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Article, Filter, PaginationInfo } from '../types';
 import { NewsService } from '../services/newsService';
 
@@ -32,6 +32,12 @@ export function useNewsApi(): UseNewsApiReturn {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Use refs to track previous values and prevent unnecessary API calls
+  const previousFilters = useRef<Filter>(currentFilters);
+  const previousSearchQuery = useRef(searchQuery);
+  const previousPage = useRef(1);
+  const previousPageSize = useRef(10);
+
   const fetchArticles = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -54,9 +60,25 @@ export function useNewsApi(): UseNewsApiReturn {
     }
   }, [currentFilters, searchQuery, pagination.currentPage, pagination.pageSize]);
 
+  // Only fetch articles when there are actual changes
   useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
+    const hasFiltersChanged = 
+      previousFilters.current.category !== currentFilters.category ||
+      previousFilters.current.source !== currentFilters.source ||
+      previousFilters.current.dateRange !== currentFilters.dateRange;
+    
+    const hasSearchChanged = previousSearchQuery.current !== searchQuery;
+    const hasPageChanged = previousPage.current !== pagination.currentPage;
+    const hasPageSizeChanged = previousPageSize.current !== pagination.pageSize;
+
+    if (hasFiltersChanged || hasSearchChanged || hasPageChanged || hasPageSizeChanged) {
+      previousFilters.current = currentFilters;
+      previousSearchQuery.current = searchQuery;
+      previousPage.current = pagination.currentPage;
+      previousPageSize.current = pagination.pageSize;
+      fetchArticles();
+    }
+  }, [currentFilters, searchQuery, pagination.currentPage, pagination.pageSize, fetchArticles]);
 
   const searchArticles = useCallback((query: string) => {
     setSearchQuery(query);

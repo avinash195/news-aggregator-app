@@ -13,6 +13,10 @@ interface FiltersProps {
   onApplyFilters: () => void;
   onClearFilters: () => void;
   loading?: boolean;
+  preferences?: {
+    preferredSources: string[];
+    preferredCategories: string[];
+  };
 }
 
 export function Filters({
@@ -20,12 +24,12 @@ export function Filters({
   categories,
   sources,
   dateRanges,
-  sortOptions,
   activeFiltersCount,
   onFilterChange,
   onApplyFilters,
   onClearFilters,
-  loading = false
+  loading = false,
+  preferences
 }: FiltersProps) {
   const [openDropdown, setOpenDropdown] = useState<keyof Filter | null>(null);
 
@@ -63,11 +67,18 @@ export function Filters({
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold text-gray-900">Filters</h3>
-        {activeFiltersCount > 0 && (
-          <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-            {activeFiltersCount}
-          </span>
-        )}
+        <div className="flex items-center space-x-2">
+          {preferences && (preferences.preferredCategories.length > 0 || preferences.preferredSources.length > 0) && (
+            <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+              Preferences Active
+            </span>
+          )}
+          {activeFiltersCount > 0 && (
+            <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+              {activeFiltersCount}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="space-y-5">
@@ -151,6 +162,12 @@ export function Filters({
                   className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                 >
                   {dropdown.label}: {dropdown.value}
+                  {preferences && (
+                    (dropdown.key === 'category' && preferences.preferredCategories.includes(dropdown.value)) ||
+                    (dropdown.key === 'source' && preferences.preferredSources.includes(dropdown.value))
+                  ) && (
+                    <span className="ml-1 text-green-600">⭐</span>
+                  )}
                   <button
                     type="button"
                     onClick={() => {

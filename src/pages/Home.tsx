@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 // import { useState } from 'react';
 import { useNewsApi } from '../hooks/useNewsApi';
 import { useFilters } from '../hooks/useFilters';
@@ -7,9 +7,9 @@ import { ArticleCard } from '../components/ArticleCard';
 import { Loader } from '../components/Loader';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Pagination } from '../components/Pagination';
-import type { Article } from '../types';
+import type { Article, UserPreferences } from '../types';
 
-export function Home({ searchQuery }: { searchQuery: string }) {
+export function Home({ searchQuery, preferences }: { searchQuery: string; preferences: UserPreferences }) {
   const {
     articles,
     loading,
@@ -30,16 +30,60 @@ export function Home({ searchQuery }: { searchQuery: string }) {
     dateRanges,
     updateFilter,
     resetFilters,
-    getActiveFiltersCount
-  } = useFilters();
+    getActiveFiltersCount,
+    applyPreferences
+  } = useFilters(preferences);
 
-  // Trigger search when searchQuery changes
+  // Use refs to track previous values and prevent unnecessary API calls
+  const previousSearchQuery = useRef(searchQuery);
+  const previousFilters = useRef(filters);
+  const isInitialLoad = useRef(true);
+
+  // Trigger search when searchQuery changes (but only if it actually changed)
   useEffect(() => {
-    console.log('Home: Search query changed:', searchQuery);
-    if (searchQuery !== currentSearchQuery) {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      previousSearchQuery.current = searchQuery;
+      return;
+    }
+
+    if (searchQuery !== previousSearchQuery.current) {
+      console.log('Home: Search query changed:', searchQuery);
+      previousSearchQuery.current = searchQuery;
       searchArticles(searchQuery);
     }
-  }, [searchQuery, searchArticles, currentSearchQuery]);
+  }, [searchQuery, searchArticles]);
+
+  // Apply preferences when they change (but only if they actually changed)
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      return;
+    }
+
+    if (preferences.preferredCategories.length > 0 || preferences.preferredSources.length > 0) {
+      applyPreferences(preferences);
+    }
+  }, [preferences, applyPreferences]);
+
+  // Apply filters when they change (but only if they actually changed)
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      previousFilters.current = filters;
+      return;
+    }
+
+    // Check if filters actually changed
+    const hasChanged = 
+      previousFilters.current.category !== filters.category ||
+      previousFilters.current.source !== filters.source ||
+      previousFilters.current.dateRange !== filters.dateRange;
+
+    if (hasChanged) {
+      previousFilters.current = filters;
+      applyFilters(filters);
+    }
+  }, [filters, applyFilters]);
 
   // Saved articles state (for future implementation)
   // const [savedArticles, setSavedArticles] = useState<Set<string>>(new Set());
@@ -86,6 +130,7 @@ export function Home({ searchQuery }: { searchQuery: string }) {
                 onApplyFilters={handleApplyFilters}
                 onClearFilters={handleClearFilters}
                 loading={loading}
+                preferences={preferences}
               />
             </div>
           </div>
