@@ -1,6 +1,6 @@
 import type { Article, GuardianApiResponse, GuardianSectionsResponse, GuardianTagsResponse } from '../types';
 
-const GUARDIAN_API_KEY = import.meta.env.VITE_GUARDIAN_API_KEY;
+const GUARDIAN_API_KEY = 'test';
 const GUARDIAN_API_BASE_URL = 'https://content.guardianapis.com';
 
 export class GuardianApiService {

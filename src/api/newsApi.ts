@@ -1,6 +1,6 @@
 import type { Article, NewsApiResponse } from '../types';
 
-const NEWS_API_KEY = import.meta.env.VITE_NEWS_API_KEY;
+const NEWS_API_KEY = '3d4e1c9d4a3c4eba934649a67b841114';
 const NEWS_API_BASE_URL = 'https://newsapi.org/v2';
 
 export class NewsApiService {

@@ -1,6 +1,6 @@
-import type { Article, NYTApiResponse, NYTSectionsResponse } from '../types';
+import type { Article, NYTApiResponse, NYTSectionsResponse, NYTMostPopularResponse } from '../types';
 
-const NYT_API_KEY = import.meta.env.VITE_NYT_API_KEY;
+const NYT_API_KEY = '2OMHpKDtUsBDI3MsDJ7qHsB0l45rgOWx';
 const NYT_API_BASE_URL = 'https://api.nytimes.com/svc';
 
 export class NYTApiService {
@@ -48,25 +48,33 @@ export class NYTApiService {
     try {
       const response = await this.makeRequest('/search/v2/articlesearch.json', params);
       
-      const articles: Article[] = response.results.map((result, index) => ({
-        id: `nyt-${result.uri}-${index}`,
-        title: result.title || 'No title available',
-        description: result.abstract || 'No description available',
-        content: result.abstract || 'No content available',
-        url: result.url,
-        urlToImage: result.media?.[0]?.['media-metadata']?.[0]?.url || '/placeholder-image.jpg',
-        publishedAt: result.published_date,
-        author: result.byline || 'Unknown Author',
-        source: {
-          id: result.source || 'unknown',
-          name: 'The New York Times'
-        },
-        category: result.section || 'general'
-      }));
+      // Check if response has the expected structure
+      if (!response.response?.docs || !Array.isArray(response.response.docs)) {
+        console.error('NYT API response missing docs array:', response);
+        return { articles: [], totalResults: 0 };
+      }
+      
+      const articles: Article[] = response.response.docs.map((doc, index) => {
+        return {
+          id: `nyt-${doc.uri || doc._id || index}`,
+          title: doc.headline?.main || 'No title available',
+          description: doc.abstract || doc.snippet || 'No description available',
+          content: doc.abstract || doc.snippet || 'No content available',
+          url: doc.web_url,
+          urlToImage: doc.multimedia?.default?.url || doc.multimedia?.thumbnail?.url || '/placeholder-image.jpg',
+          publishedAt: doc.pub_date || new Date().toISOString(),
+          author: doc.byline?.original || 'Unknown Author',
+          source: {
+            id: doc.source || 'unknown',
+            name: 'The New York Times'
+          },
+          category: doc.section_name || doc.news_desk || 'general'
+        };
+      });
 
       return {
         articles,
-        totalResults: response.num_results
+        totalResults: response.response.metadata?.hits || response.response.docs.length
       };
     } catch (error) {
       console.error('Error searching articles from NYT API:', error);
@@ -79,7 +87,7 @@ export class NYTApiService {
     time_period?: number;
   } = {}): Promise<{ articles: Article[]; totalResults: number }> {
     try {
-      const response = await this.makeRequest('/mostpopular/v2/viewed/1.json', params);
+      const response = await this.makeRequest('/mostpopular/v2/viewed/1.json', params) as unknown as NYTMostPopularResponse;
       
       const articles: Article[] = response.results.map((result, index) => ({
         id: `nyt-popular-${result.uri}-${index}`,

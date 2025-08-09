@@ -11,7 +11,6 @@ export class NewsService {
     pageSize: number = 20
   ): Promise<{ articles: Article[]; pagination: PaginationInfo }> {
     const allArticles: Article[] = [];
-    let totalResults = 0;
 
     try {
       // Fetch from NewsAPI
@@ -30,7 +29,12 @@ export class NewsService {
             newsApiResult = await NewsApiService.searchArticles(searchParams);
           } else {
             // Use top-headlines for general news
-            const topHeadlinesParams: any = {
+            const topHeadlinesParams: {
+              pageSize: number;
+              page: number;
+              country: string;
+              category?: string;
+            } = {
               pageSize: pageSize,
               page,
               country: 'us' // Default country parameter required by NewsAPI
@@ -43,7 +47,6 @@ export class NewsService {
             newsApiResult = await NewsApiService.getTopHeadlines(topHeadlinesParams);
           }
           allArticles.push(...newsApiResult.articles);
-          totalResults += newsApiResult.totalResults;
         } catch (error) {
           console.error('NewsAPI failed:', error);
         }
@@ -52,7 +55,12 @@ export class NewsService {
       // Fetch from Guardian API
       if (filters.source === 'All Sources' || filters.source === 'The Guardian') {
         try {
-          const guardianParams: any = {
+          const guardianParams: {
+            'page-size': number;
+            page: number;
+            q?: string;
+            section?: string;
+          } = {
             'page-size': pageSize,
             page
           };
@@ -66,7 +74,6 @@ export class NewsService {
 
           const guardianResult = await GuardianApiService.searchArticles(guardianParams);
           allArticles.push(...guardianResult.articles);
-          totalResults += guardianResult.totalResults;
         } catch (error) {
           console.error('Guardian API failed:', error);
         }
@@ -75,7 +82,11 @@ export class NewsService {
       // Fetch from NYT API
       if (filters.source === 'All Sources' || filters.source === 'The New York Times') {
         try {
-          const nytParams: any = {
+          const nytParams: {
+            page: number;
+            q?: string;
+            fq?: string;
+          } = {
             page: page
           };
 
@@ -87,8 +98,8 @@ export class NewsService {
           }
 
           const nytResult = await NYTApiService.searchArticles(nytParams);
+          
           allArticles.push(...nytResult.articles);
-          totalResults += nytResult.totalResults;
         } catch (error) {
           console.error('NYT API failed:', error);
         }
