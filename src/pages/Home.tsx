@@ -28,7 +28,6 @@ export function Home({ searchQuery }: { searchQuery: string }) {
     categories,
     sources,
     dateRanges,
-    sortOptions,
     updateFilter,
     resetFilters,
     getActiveFiltersCount
@@ -64,8 +63,7 @@ export function Home({ searchQuery }: { searchQuery: string }) {
     applyFilters({
       category: 'All Categories',
       source: 'All Sources',
-      dateRange: 'All Time',
-      sortBy: 'Date (Newest)'
+      dateRange: 'All Time'
     });
   };
 
@@ -83,7 +81,6 @@ export function Home({ searchQuery }: { searchQuery: string }) {
                 categories={categories}
                 sources={sources}
                 dateRanges={dateRanges}
-                sortOptions={sortOptions}
                 activeFiltersCount={getActiveFiltersCount()}
                 onFilterChange={updateFilter}
                 onApplyFilters={handleApplyFilters}
@@ -120,8 +117,7 @@ export function Home({ searchQuery }: { searchQuery: string }) {
                 {Object.entries(filters).map(([key, value]) => {
                   const isDefault = (key === 'category' && value === 'All Categories') ||
                                    (key === 'source' && value === 'All Sources') ||
-                                   (key === 'dateRange' && value === 'All Time') ||
-                                   (key === 'sortBy' && value === 'Date (Newest)');
+                                   (key === 'dateRange' && value === 'All Time');
                   
                   if (isDefault) return null;
 

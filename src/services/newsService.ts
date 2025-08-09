@@ -94,24 +94,21 @@ export class NewsService {
         }
       }
 
-      // Sort articles by date
+      // Sort articles by date (newest first)
       allArticles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
       // Apply date range filter
       const filteredArticles = this.applyDateRangeFilter(allArticles, filters.dateRange);
 
-      // Apply sorting
-      const sortedArticles = this.applySorting(filteredArticles, filters.sortBy);
-
       // Apply pagination
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
-      const paginatedArticles = sortedArticles.slice(startIndex, endIndex);
+      const paginatedArticles = filteredArticles.slice(startIndex, endIndex);
 
       const pagination: PaginationInfo = {
         currentPage: page,
-        totalPages: Math.ceil(sortedArticles.length / pageSize),
-        totalResults: sortedArticles.length,
+        totalPages: Math.ceil(filteredArticles.length / pageSize),
+        totalResults: filteredArticles.length,
         pageSize
       };
 
@@ -157,20 +154,7 @@ export class NewsService {
     });
   }
 
-  private static applySorting(articles: Article[], sortBy: string): Article[] {
-    switch (sortBy) {
-      case 'Date (Newest)':
-        return articles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-      case 'Date (Oldest)':
-        return articles.sort((a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime());
-      case 'Title':
-        return articles.sort((a, b) => a.title.localeCompare(b.title));
-      case 'Source':
-        return articles.sort((a, b) => a.source.name.localeCompare(b.source.name));
-      default:
-        return articles;
-    }
-  }
+
 
   static async getCategories(): Promise<string[]> {
     return [
@@ -205,12 +189,5 @@ export class NewsService {
     ];
   }
 
-  static async getSortOptions(): Promise<string[]> {
-    return [
-      'Date (Newest)',
-      'Date (Oldest)',
-      'Title',
-      'Source'
-    ];
-  }
+
 } 

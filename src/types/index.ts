@@ -18,7 +18,6 @@ export interface Filter {
   category: string;
   source: string;
   dateRange: string;
-  sortBy: string;
 }
 
 export interface NewsApiResponse {

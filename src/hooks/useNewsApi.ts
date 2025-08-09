@@ -28,8 +28,7 @@ export function useNewsApi(): UseNewsApiReturn {
   const [currentFilters, setCurrentFilters] = useState<Filter>({
     category: 'All Categories',
     source: 'All Sources',
-    dateRange: 'All Time',
-    sortBy: 'Date (Newest)'
+    dateRange: 'All Time'
   });
   const [searchQuery, setSearchQuery] = useState('');
 

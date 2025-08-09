@@ -8,7 +8,6 @@ interface FiltersProps {
   categories: string[];
   sources: string[];
   dateRanges: string[];
-  sortOptions: string[];
   activeFiltersCount: number;
   onFilterChange: <K extends keyof Filter>(key: K, value: Filter[K]) => void;
   onApplyFilters: () => void;
@@ -48,12 +47,6 @@ export function Filters({
       label: 'Date Range',
       value: filters.dateRange,
       options: dateRanges
-    },
-    {
-      key: 'sortBy' as keyof Filter,
-      label: 'Sort by',
-      value: filters.sortBy,
-      options: sortOptions
     }
   ];
 
@@ -148,8 +141,7 @@ export function Filters({
             {dropdowns.map((dropdown) => {
               const isDefault = dropdown.key === 'category' && dropdown.value === 'All Categories' ||
                                dropdown.key === 'source' && dropdown.value === 'All Sources' ||
-                               dropdown.key === 'dateRange' && dropdown.value === 'All Time' ||
-                               dropdown.key === 'sortBy' && dropdown.value === 'Date (Newest)';
+                               dropdown.key === 'dateRange' && dropdown.value === 'All Time';
               
               if (isDefault) return null;
 
@@ -164,7 +156,7 @@ export function Filters({
                     onClick={() => {
                       const defaultValue = dropdown.key === 'category' ? 'All Categories' :
                                          dropdown.key === 'source' ? 'All Sources' :
-                                         dropdown.key === 'dateRange' ? 'All Time' : 'Date (Newest)';
+                                         dropdown.key === 'dateRange' ? 'All Time' : '';
                       onFilterChange(dropdown.key, defaultValue);
                     }}
                     className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 focus:outline-none"
