@@ -139,11 +139,11 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          {/* Filters Sidebar - Hidden on mobile, shown on larger screens */}
+          <div className="xl:col-span-1 order-2 xl:order-1">
+            <div className="xl:sticky xl:top-4">
               <Filters
                 filters={filters}
                 categories={categories}
@@ -160,21 +160,20 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="xl:col-span-3 order-1 xl:order-2">
             {/* Header */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">Latest News</h2>
-              <p className="text-lg text-gray-600">
+            <div className="mb-4 sm:mb-6 lg:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">Latest News</h2>
+              <p className="text-base sm:text-lg text-gray-600">
                 {totalResults} results found
               </p>
-              {/* Search indicator */}
               {currentSearchQuery && (
                 <p className="text-sm text-blue-600 mt-2">
                   🔍 Searching for: "{currentSearchQuery}"
                 </p>
               )}
               {articles.length > 0 && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-xs sm:text-sm text-gray-500 mt-2">
                   Showing {articles.length} articles from {totalResults} total results
                 </p>
               )}
@@ -182,7 +181,7 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
 
             {/* Active Filter Tags */}
             {getActiveFiltersCount() > 0 && (
-              <div className="mb-6 flex flex-wrap gap-2">
+              <div className="mb-4 sm:mb-6 flex flex-wrap gap-2">
                 {Object.entries(filters).map(([key, value]) => {
                   const isDefault = (key === 'category' && value === 'All Categories') ||
                                    (key === 'source' && value === 'All Sources') ||
@@ -193,7 +192,7 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
                   return (
                     <span
                       key={key}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                      className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm bg-blue-100 text-blue-800"
                     >
                       {key === 'category' ? 'Category' : 
                        key === 'source' ? 'Source' : 
@@ -206,7 +205,7 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
 
             {/* Articles Grid */}
             {loading && articles.length === 0 ? (
-              <div className="flex items-center justify-center py-12">
+              <div className="flex items-center justify-center py-8 sm:py-12">
                 <Loader size="lg" />
               </div>
             ) : error && articles.length === 0 ? (
@@ -215,15 +214,15 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
                 onRetry={refreshArticles}
               />
             ) : articles.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">📰</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No articles found</h3>
-                <p className="text-gray-600">
+              <div className="text-center py-8 sm:py-12">
+                <div className="text-gray-400 text-4xl sm:text-6xl mb-3 sm:mb-4">📰</div>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No articles found</h3>
+                <p className="text-sm sm:text-base text-gray-600 px-4">
                   {currentSearchQuery ? `No results found for "${currentSearchQuery}"` : 'Try adjusting your search or filters'}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                 {articles.map((article) => (
                   <ArticleCard
                     key={article.id}
@@ -239,12 +238,12 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
             {hasMore && (
               <div 
                 ref={lastElementRef}
-                className="flex items-center justify-center py-8"
+                className="flex items-center justify-center py-6 sm:py-8"
               >
                 {loading ? (
                   <Loader size="md" />
                 ) : (
-                  <div className="text-gray-500 text-sm">
+                  <div className="text-gray-500 text-xs sm:text-sm text-center px-4">
                     Scroll down to load more articles...
                   </div>
                 )}
@@ -253,9 +252,9 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
 
             {/* End of results */}
             {!hasMore && articles.length > 0 && (
-              <div className="text-center py-8">
-                <div className="text-gray-400 text-4xl mb-2">🏁</div>
-                <p className="text-gray-600">You've reached the end of the results</p>
+              <div className="text-center py-6 sm:py-8">
+                <div className="text-gray-400 text-3xl sm:text-4xl mb-2">🏁</div>
+                <p className="text-sm sm:text-base text-gray-600">You've reached the end of the results</p>
               </div>
             )}
           </div>
