@@ -29,22 +29,12 @@ A modern, responsive news aggregator web application built with React.js, TypeSc
    npm install
    ```
 
-3. **Set up environment variables**
-   Create a `.env` file in the root directory with your API keys:
-   ```env
-   VITE_NEWS_API_KEY=your_news_api_key
-   VITE_GUARDIAN_API_KEY=your_guardian_api_key
-   VITE_NYT_API_KEY=your_nyt_api_key
-   ```
-   
-   **Note**: The `.env` file is already in `.gitignore` to keep your API keys secure.
-
-4. **Start the development server**
+3. **Start the development server**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser**
+4. **Open your browser**
    Navigate to `http://localhost:5173`
 
 ## 🐳 Docker Development
