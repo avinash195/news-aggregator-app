@@ -1,64 +1,81 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { Article, Filter, PaginationInfo } from '../types';
+import type { Article, Filter } from '../types';
 import { NewsService } from '../services/newsService';
 
 interface UseNewsApiReturn {
   articles: Article[];
   loading: boolean;
   error: string | null;
-  pagination: PaginationInfo;
+  totalResults: number;
   searchArticles: (query: string) => void;
   applyFilters: (filters: Filter) => void;
-  changePage: (page: number) => void;
-  changePageSize: (pageSize: number) => void;
   refreshArticles: () => void;
   currentSearchQuery: string;
+  hasMore: boolean;
+  loadMore: () => void;
 }
 
 export function useNewsApi(): UseNewsApiReturn {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<PaginationInfo>({
-    currentPage: 1,
-    totalPages: 0,
-    totalResults: 0,
-    pageSize: 10
-  });
+  const [totalResults, setTotalResults] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [currentFilters, setCurrentFilters] = useState<Filter>({
     category: 'All Categories',
     source: 'All Sources',
     dateRange: 'All Time'
   });
   const [searchQuery, setSearchQuery] = useState('');
+  const [hasMore, setHasMore] = useState(true);
 
   // Use refs to track previous values and prevent unnecessary API calls
   const previousFilters = useRef<Filter>(currentFilters);
   const previousSearchQuery = useRef(searchQuery);
-  const previousPage = useRef(1);
-  const previousPageSize = useRef(10);
+  const pageSize = 20; // Fixed page size for API calls
 
-  const fetchArticles = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const fetchArticles = useCallback(async (isLoadMore: boolean = false) => {
+    if (isLoadMore) {
+      setLoading(true);
+    } else {
+      setLoading(true);
+      setError(null);
+    }
 
     try {
+      const page = isLoadMore ? currentPage + 1 : 1;
       const result = await NewsService.getArticles(
         currentFilters,
         searchQuery,
-        pagination.currentPage,
-        pagination.pageSize
+        page,
+        pageSize
       );
 
-      setArticles(result.articles);
-      setPagination(result.pagination);
+      if (isLoadMore) {
+        // Append new articles for infinite scroll
+        setArticles(prev => [...prev, ...result.articles]);
+        setCurrentPage(page);
+      } else {
+        // Replace articles for new search/filter
+        setArticles(result.articles);
+        setCurrentPage(1);
+      }
+
+      setTotalResults(result.totalResults);
+      
+      // Check if there are more articles to load
+      // For infinite scroll, we consider there are more if we got a full page of results
+      setHasMore(result.articles.length === pageSize);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch articles');
-      setArticles([]);
+      if (!isLoadMore) {
+        setArticles([]);
+        setTotalResults(0);
+      }
     } finally {
       setLoading(false);
     }
-  }, [currentFilters, searchQuery, pagination.currentPage, pagination.pageSize]);
+  }, [currentFilters, searchQuery, currentPage, pageSize]);
 
   // Only fetch articles when there are actual changes
   useEffect(() => {
@@ -68,50 +85,48 @@ export function useNewsApi(): UseNewsApiReturn {
       previousFilters.current.dateRange !== currentFilters.dateRange;
     
     const hasSearchChanged = previousSearchQuery.current !== searchQuery;
-    const hasPageChanged = previousPage.current !== pagination.currentPage;
-    const hasPageSizeChanged = previousPageSize.current !== pagination.pageSize;
 
-    if (hasFiltersChanged || hasSearchChanged || hasPageChanged || hasPageSizeChanged) {
+    if (hasFiltersChanged || hasSearchChanged) {
       previousFilters.current = currentFilters;
       previousSearchQuery.current = searchQuery;
-      previousPage.current = pagination.currentPage;
-      previousPageSize.current = pagination.pageSize;
-      fetchArticles();
+      setCurrentPage(1);
+      setHasMore(true);
+      fetchArticles(false);
     }
-  }, [currentFilters, searchQuery, pagination.currentPage, pagination.pageSize, fetchArticles]);
+  }, [currentFilters, searchQuery, fetchArticles]);
 
   const searchArticles = useCallback((query: string) => {
     setSearchQuery(query);
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
+    setCurrentPage(1);
+    setHasMore(true);
   }, []);
 
   const applyFilters = useCallback((filters: Filter) => {
     setCurrentFilters(filters);
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
+    setCurrentPage(1);
+    setHasMore(true);
   }, []);
 
-  const changePage = useCallback((page: number) => {
-    setPagination(prev => ({ ...prev, currentPage: page }));
-  }, []);
-
-  const changePageSize = useCallback((pageSize: number) => {
-    setPagination(prev => ({ ...prev, pageSize, currentPage: 1 }));
-  }, []);
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      fetchArticles(true);
+    }
+  }, [loading, hasMore, fetchArticles]);
 
   const refreshArticles = useCallback(() => {
-    fetchArticles();
+    fetchArticles(false);
   }, [fetchArticles]);
 
   return {
     articles,
     loading,
     error,
-    pagination,
+    totalResults,
     searchArticles,
     applyFilters,
-    changePage,
-    changePageSize,
     refreshArticles,
-    currentSearchQuery: searchQuery
+    currentSearchQuery: searchQuery,
+    hasMore,
+    loadMore
   };
 }

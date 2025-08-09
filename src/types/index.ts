@@ -187,11 +187,4 @@ export interface UserPreferences {
   preferredSources: string[];
   preferredCategories: string[];
   preferredAuthors: string[];
-}
-
-export interface PaginationInfo {
-  currentPage: number;
-  totalPages: number;
-  totalResults: number;
-  pageSize: number;
 } 

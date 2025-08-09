@@ -1,4 +1,4 @@
-import type { Article, Filter, PaginationInfo } from '../types';
+import type { Article, Filter } from '../types';
 import { NewsApiService } from '../api/newsApi';
 import { GuardianApiService } from '../api/guardianApi';
 import { NYTApiService } from '../api/nytApi';
@@ -9,7 +9,7 @@ export class NewsService {
     searchQuery: string = '',
     page: number = 1,
     pageSize: number = 20
-  ): Promise<{ articles: Article[]; pagination: PaginationInfo }> {
+  ): Promise<{ articles: Article[]; totalResults: number }> {
     const allArticles: Article[] = [];
 
     try {
@@ -111,32 +111,19 @@ export class NewsService {
       // Apply date range filter
       const filteredArticles = this.applyDateRangeFilter(allArticles, filters.dateRange);
 
-      // Apply pagination
-      const startIndex = (page - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginatedArticles = filteredArticles.slice(startIndex, endIndex);
-
-      const pagination: PaginationInfo = {
-        currentPage: page,
-        totalPages: Math.ceil(filteredArticles.length / pageSize),
-        totalResults: filteredArticles.length,
-        pageSize
-      };
+      // For infinite scroll, we don't slice the results here
+      // The API calls handle pagination, we just return all fetched articles
+      const totalResults = filteredArticles.length;
 
       return {
-        articles: paginatedArticles,
-        pagination
+        articles: filteredArticles,
+        totalResults
       };
     } catch (error) {
       console.error('Error fetching articles:', error);
       return {
         articles: [],
-        pagination: {
-          currentPage: page,
-          totalPages: 0,
-          totalResults: 0,
-          pageSize
-        }
+        totalResults: 0
       };
     }
   }

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 // import { useState } from 'react';
 import { useNewsApi } from '../hooks/useNewsApi';
 import { useFilters } from '../hooks/useFilters';
@@ -6,7 +6,6 @@ import { Filters } from '../components/Filters';
 import { ArticleCard } from '../components/ArticleCard';
 import { Loader } from '../components/Loader';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { Pagination } from '../components/Pagination';
 import type { Article, UserPreferences } from '../types';
 
 export function Home({ searchQuery, preferences }: { searchQuery: string; preferences: UserPreferences }) {
@@ -14,13 +13,13 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
     articles,
     loading,
     error,
-    pagination,
+    totalResults,
     applyFilters,
     searchArticles,
-    changePage,
-    changePageSize,
     refreshArticles,
-    currentSearchQuery
+    currentSearchQuery,
+    hasMore,
+    loadMore
   } = useNewsApi();
 
   const {
@@ -38,6 +37,24 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
   const previousSearchQuery = useRef(searchQuery);
   const previousFilters = useRef(filters);
   const isInitialLoad = useRef(true);
+
+  // Intersection Observer for infinite scroll
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Callback for intersection observer
+  const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading) return;
+    
+    if (observerRef.current) observerRef.current.disconnect();
+    
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore && !loading) {
+        loadMore();
+      }
+    });
+    
+    if (node) observerRef.current.observe(node);
+  }, [loading, hasMore, loadMore]);
 
   // Trigger search when searchQuery changes (but only if it actually changed)
   useEffect(() => {
@@ -85,6 +102,15 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
     }
   }, [filters, applyFilters]);
 
+  // Cleanup observer on unmount
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
   // Saved articles state (for future implementation)
   // const [savedArticles, setSavedArticles] = useState<Set<string>>(new Set());
 
@@ -110,8 +136,6 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
       dateRange: 'All Time'
     });
   };
-
-  // Pagination is now handled by the Pagination component
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -141,7 +165,7 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-3">Latest News</h2>
               <p className="text-lg text-gray-600">
-                {pagination.totalResults} results found
+                {totalResults} results found
               </p>
               {/* Search indicator */}
               {currentSearchQuery && (
@@ -151,7 +175,7 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
               )}
               {articles.length > 0 && (
                 <p className="text-sm text-gray-500 mt-2">
-                  Showing {articles.length} articles from {pagination.totalResults} total results
+                  Showing {articles.length} articles from {totalResults} total results
                 </p>
               )}
             </div>
@@ -181,11 +205,11 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
             )}
 
             {/* Articles Grid */}
-            {loading ? (
+            {loading && articles.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <Loader size="lg" />
               </div>
-            ) : error ? (
+            ) : error && articles.length === 0 ? (
               <ErrorMessage
                 message={error}
                 onRetry={refreshArticles}
@@ -211,14 +235,29 @@ export function Home({ searchQuery, preferences }: { searchQuery: string; prefer
               </div>
             )}
 
-            {/* Enhanced Pagination */}
-            <Pagination
-              pagination={pagination}
-              onPageChange={changePage}
-              onPageSizeChange={changePageSize}
-              showPageSizeSelector={true}
-              pageSizeOptions={[10, 20, 50, 100]}
-            />
+            {/* Loading indicator for infinite scroll */}
+            {hasMore && (
+              <div 
+                ref={lastElementRef}
+                className="flex items-center justify-center py-8"
+              >
+                {loading ? (
+                  <Loader size="md" />
+                ) : (
+                  <div className="text-gray-500 text-sm">
+                    Scroll down to load more articles...
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* End of results */}
+            {!hasMore && articles.length > 0 && (
+              <div className="text-center py-8">
+                <div className="text-gray-400 text-4xl mb-2">🏁</div>
+                <p className="text-gray-600">You've reached the end of the results</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
