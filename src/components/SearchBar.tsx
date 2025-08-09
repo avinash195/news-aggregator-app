@@ -14,7 +14,6 @@ export function SearchBar({ onSearch, placeholder = "Search articles...", classN
   const timeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    // Debounce search input
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
@@ -38,7 +37,7 @@ export function SearchBar({ onSearch, placeholder = "Search articles...", classN
   return (
     <div className={cn("relative", className)}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
           type="text"
           value={query}
@@ -47,14 +46,14 @@ export function SearchBar({ onSearch, placeholder = "Search articles...", classN
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           className={cn(
-            "w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base",
+            "w-full pl-8 sm:pl-10 pr-8 sm:pr-10 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base",
             isFocused && "border-blue-500"
           )}
         />
         {query && (
           <button
             onClick={handleClear}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600"
+            className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
           >
             <X className="h-4 w-4" />
           </button>

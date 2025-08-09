@@ -17,6 +17,7 @@ interface FiltersProps {
     preferredSources: string[];
     preferredCategories: string[];
   };
+  isMobile?: boolean;
 }
 
 export function Filters({
@@ -29,7 +30,8 @@ export function Filters({
   onApplyFilters,
   onClearFilters,
   loading = false,
-  preferences
+  preferences,
+  isMobile = false
 }: FiltersProps) {
   const [openDropdown, setOpenDropdown] = useState<keyof Filter | null>(null);
 
@@ -64,24 +66,32 @@ export function Filters({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 lg:p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Filters</h3>
-        <div className="flex items-center space-x-2">
-          {preferences && (preferences.preferredCategories.length > 0 || preferences.preferredSources.length > 0) && (
-            <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-              Preferences Active
-            </span>
-          )}
-          {activeFiltersCount > 0 && (
-            <span className="bg-blue-100 text-blue-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full">
-              {activeFiltersCount}
-            </span>
-          )}
+    <div className={cn(
+      "bg-white border border-gray-200 rounded-lg shadow-sm",
+      isMobile ? "border-0 shadow-none" : "p-3 sm:p-4 lg:p-6"
+    )}>
+      {!isMobile && (
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Filters</h3>
+          <div className="flex items-center space-x-2">
+            {preferences && (preferences.preferredCategories.length > 0 || preferences.preferredSources.length > 0) && (
+              <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                Preferences Active
+              </span>
+            )}
+            {activeFiltersCount > 0 && (
+              <span className="bg-blue-100 text-blue-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full">
+                {activeFiltersCount}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="space-y-3 sm:space-y-4 lg:space-y-5">
+      <div className={cn(
+        "space-y-3 sm:space-y-4 lg:space-y-5",
+        isMobile && "space-y-4"
+      )}>
         {dropdowns.map((dropdown) => (
           <div key={dropdown.key} className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-2 sm:mb-3">
@@ -125,7 +135,10 @@ export function Filters({
           </div>
         ))}
 
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4 sm:pt-6">
+        <div className={cn(
+          "flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4 sm:pt-6",
+          isMobile && "pt-6"
+        )}>
           <button
             type="button"
             onClick={onApplyFilters}
@@ -147,7 +160,10 @@ export function Filters({
 
       {/* Active Filter Tags */}
       {activeFiltersCount > 0 && (
-        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+        <div className={cn(
+          "mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200",
+          isMobile && "mt-4 pt-4"
+        )}>
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {dropdowns.map((dropdown) => {
               const isDefault = dropdown.key === 'category' && dropdown.value === 'All Categories' ||
